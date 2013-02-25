@@ -64,8 +64,8 @@ public class SimpleGravityKillTracker extends AbstractTracker {
     }
 
     private void checkAttackCancelled(final Attack attack, long time) {
-        if (this.attacks.get(attack.victim) == attack) {
-            if (attack.wasAttacked) {
+        if(this.attacks.get(attack.victim) == attack) {
+            if(attack.wasAttacked) {
                 if (!attack.isInLava) {
                     if (attack.victim.isOnGround() && time - attack.onGroundTime > MAX_ON_GROUND_TIME) this.cancelFall(attack);
                     if (attack.isSwimming && time - attack.swimmingTime > MAX_SWIMMING_TIME) this.cancelFall(attack);
@@ -88,7 +88,7 @@ public class SimpleGravityKillTracker extends AbstractTracker {
     }
 
     private void checkKnockback(final Attack attack, long time) {
-        if (!attack.wasAttacked && !this.isSupported(attack) && time - attack.time <= MAX_KNOCKBACK_TIME) {
+        if(!attack.wasAttacked && !this.isSupported(attack) && time - attack.time <= MAX_KNOCKBACK_TIME) {
             attack.wasAttacked = true;
         }
     }
@@ -126,14 +126,8 @@ public class SimpleGravityKillTracker extends AbstractTracker {
 
     public void nonVictimOffGround(Player player, long time) {
         BrokenBlock brokenBlock = BrokenBlock.findBlockBrokenUnderPlayer(player, time, this.brokenBlocks);
-        if (brokenBlock != null) {
-            Attack attack = new Attack(
-                brokenBlock.breaker,
-                Attack.Cause.SPLEEF,
-                player,
-                Attack.From.FLOOR,
-                brokenBlock.time
-            );
+        if(brokenBlock != null) {
+            Attack attack = new Attack(brokenBlock.breaker, Attack.Cause.SPLEEF, player, Attack.From.FLOOR, brokenBlock.time );
 
             attack.isClimbing = PlayerBlockChecker.isClimbing(player);
             attack.isSwimming = PlayerBlockChecker.isSwimming(player, Material.WATER);
@@ -146,19 +140,25 @@ public class SimpleGravityKillTracker extends AbstractTracker {
     }
 
     public Attack playerAttacked(Player player, Entity entity, long time) {
-        if (this.attacks.containsKey(player))
+        if(this.attacks.containsKey(player)) {
             return null;
+        }
+
+        if(!(entity instanceof LivingEntity)) {
+            return null;
+        }
 
         boolean isInLava = PlayerBlockChecker.isSwimming(player, Material.LAVA);
 
-        if (isInLava)
+        if(isInLava) {
             return null;
+        }
 
         boolean isClimbing = PlayerBlockChecker.isClimbing(player);
         boolean isSwimming = PlayerBlockChecker.isSwimming(player, Material.WATER);
 
         Attack.Cause cause;
-        if (entity instanceof Projectile) {
+        if(entity instanceof Projectile) {
             entity = ((Projectile) entity).getShooter();
             cause = Attack.Cause.SHOOT;
         } else {
@@ -166,21 +166,15 @@ public class SimpleGravityKillTracker extends AbstractTracker {
         }
 
         Attack.From from = null;
-        if (isClimbing) {
+        if(isClimbing) {
             from = Attack.From.LADDER;
-        } else if (isSwimming) {
+        } else if(isSwimming) {
             from = Attack.From.WATER;
         } else {
             from = Attack.From.FLOOR;
         }
 
-        Attack attack = new Attack(
-            (LivingEntity) entity,
-            cause,
-            player,
-            from,
-            time
-        );
+        Attack attack = new Attack((LivingEntity) entity, cause, player, from, time);
 
         attack.isClimbing = isClimbing;
         attack.isSwimming = isSwimming;
@@ -190,14 +184,15 @@ public class SimpleGravityKillTracker extends AbstractTracker {
 
         this.attacks.put(player, attack);
 
-        if (!attack.wasAttacked)
+        if(!attack.wasAttacked) {
             this.scheduleCheckAttackCancelled(attack, MAX_KNOCKBACK_TIME + 1);
+        }
 
         return attack;
     }
 
     public boolean wasAttackFatal(Attack attack, EntityDamageEvent.DamageCause damageCause, long time) {
-        switch (damageCause) {
+        switch(damageCause) {
             case VOID:
             case FALL:
             case LAVA:

@@ -5,7 +5,6 @@ import java.util.HashMap;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
-import org.bukkit.util.BlockVector;
 
 import tc.oc.tracker.util.PlayerBlockChecker;
 
@@ -35,10 +34,10 @@ public class BrokenBlock {
 
         for(int x = x1; x <= x2; ++x) {
             for(int z = z1; z <= z2; ++z) {
-                BlockVector bv = new BlockVector(x,y,z);
+                Location bl = new Location(location.getWorld(), x, y, z);
 
-                if(blocks.containsKey(bv)) {
-                    BrokenBlock brokenBlock = blocks.get(bv);
+                if(blocks.containsKey(bl)) {
+                    BrokenBlock brokenBlock = blocks.get(bl);
                     if(lastBrokenBlock == null || brokenBlock.time > lastBrokenBlock.time) {
                         lastBrokenBlock = brokenBlock;
                     }

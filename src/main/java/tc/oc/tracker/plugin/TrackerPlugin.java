@@ -59,7 +59,7 @@ public class TrackerPlugin extends JavaPlugin {
         drm.register(new GravityDamageResolver(gravityKillTracker));
 
         // debug
-        this.registerEvents(new DebugListener());
+        // this.registerEvents(new DebugListener());
     }
 
     public void scheduleSyncDelayedTask(Runnable runnable, long delay) {

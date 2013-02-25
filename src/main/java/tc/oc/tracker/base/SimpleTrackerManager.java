@@ -6,6 +6,8 @@ import java.util.Set;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import org.bukkit.World;
+
 import tc.oc.tracker.Tracker;
 import tc.oc.tracker.TrackerManager;
 
@@ -33,6 +35,12 @@ public class SimpleTrackerManager implements TrackerManager {
         Preconditions.checkArgument(trackerClass.isInstance(tracker), "tracker is not an instance of the specified class");
 
         return setTrackerInDB(this.trackers, trackerClass, tracker);
+    }
+
+    public void clearTrackers(@Nonnull World world) {
+        for(Tracker tracker : this.getTrackers()) {
+            tracker.clear(world);
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -67,7 +75,7 @@ public class SimpleTrackerManager implements TrackerManager {
 
     @SuppressWarnings("unchecked")
     private static @Nullable <T extends Tracker> T setTrackerInDB(@Nonnull Map<Class<? extends Tracker>, Tracker> db, @Nonnull Class<T> trackerClass, @Nullable T tracker) {
-        if(tracker != null) {
+        if(tracker == null) {
             return (T) db.remove(trackerClass);
         } else {
             return (T) db.put(trackerClass, tracker);
