@@ -7,12 +7,15 @@ import tc.oc.tracker.DamageResolverManager;
 import tc.oc.tracker.DamageResolvers;
 import tc.oc.tracker.TrackerManager;
 import tc.oc.tracker.Trackers;
-import tc.oc.tracker.damage.resolvers.ProjectileDamageResolver;
-import tc.oc.tracker.damage.resolvers.TNTDamageResolver;
+import tc.oc.tracker.damage.resolvers.*;
 import tc.oc.tracker.trackers.ExplosiveTracker;
 import tc.oc.tracker.trackers.base.SimpleExplosiveTracker;
+import tc.oc.tracker.trackers.base.gravity.SimpleGravityKillTracker;
+import tc.oc.tracker.util.TickTimer;
 
 public class TrackerPlugin extends JavaPlugin {
+    public TickTimer tickTimer;
+
     @Override
     public void onDisable() {
         Trackers.getManager().clearTracker(ExplosiveTracker.class, SimpleExplosiveTracker.class);
@@ -27,23 +30,40 @@ public class TrackerPlugin extends JavaPlugin {
         EntityDamageEventListener damageEventListener = new EntityDamageEventListener();
         damageEventListener.register(this);
 
+        // timer
+        this.tickTimer = new TickTimer(this);
+        this.tickTimer.start();
+
         // tracker setup
         TrackerManager tm = Trackers.getManager();
 
         ExplosiveTracker explosiveTracker = new SimpleExplosiveTracker();
+        SimpleGravityKillTracker gravityKillTracker = new SimpleGravityKillTracker(this, this.tickTimer);
+
         explosiveTracker.enable();
+        gravityKillTracker.enable();
 
         this.registerEvents(new ExplosiveListener(explosiveTracker));
+        this.registerEvents(new GravityListener(gravityKillTracker));
+
         tm.setTracker(ExplosiveTracker.class, explosiveTracker);
+        tm.setTracker(SimpleGravityKillTracker.class, gravityKillTracker);
 
         // register damage resolvers
         DamageResolverManager drm = DamageResolvers.getManager();
 
         drm.register(new ProjectileDamageResolver());
         drm.register(new TNTDamageResolver(explosiveTracker));
+        drm.register(new VoidDamageResolver());
+        drm.register(new MeleeDamageResolver());
+        drm.register(new GravityDamageResolver(gravityKillTracker));
 
         // debug
         this.registerEvents(new DebugListener());
+    }
+
+    public void scheduleSyncDelayedTask(Runnable runnable, long delay) {
+        this.getServer().getScheduler().scheduleSyncDelayedTask(this, runnable, delay);
     }
 
     private void registerEvents(Listener listener) {
