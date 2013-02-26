@@ -144,10 +144,6 @@ public class SimpleGravityKillTracker extends AbstractTracker {
             return null;
         }
 
-        if(!(entity instanceof LivingEntity)) {
-            return null;
-        }
-
         boolean isInLava = PlayerBlockChecker.isSwimming(player, Material.LAVA);
 
         if(isInLava) {
@@ -163,6 +159,10 @@ public class SimpleGravityKillTracker extends AbstractTracker {
             cause = Attack.Cause.SHOOT;
         } else {
             cause = Attack.Cause.HIT;
+        }
+
+        if(!(entity instanceof LivingEntity)) {
+            return null;
         }
 
         Attack.From from = null;
