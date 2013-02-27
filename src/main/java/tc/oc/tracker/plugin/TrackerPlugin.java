@@ -61,6 +61,7 @@ public class TrackerPlugin extends JavaPlugin {
         drm.register(new ProjectileDamageResolver());
         drm.register(new TNTDamageResolver(explosiveTracker));
         drm.register(new VoidDamageResolver());
+        drm.register(new GravityDamageResolver(gravityKillTracker, this.tickTimer));
 
         // debug
         // this.registerEvents(new DebugListener());
