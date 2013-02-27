@@ -50,7 +50,7 @@ public class EntityDamageEventListener implements Listener {
             LivingEntity entity = (LivingEntity) bukkit.getEntity();
 
             if(entity.isDead()) return;
-            
+
             DamageAPIHelper helper = DamageAPIHelper.get();
             Lifetime lifetime = Lifetimes.getLifetime(entity);
 
@@ -80,7 +80,10 @@ public class EntityDamageEventListener implements Listener {
             // clean up
             if(this.priority == EventPriority.MONITOR) {
                 DamageAPIHelper.get().setOurEvent(bukkit, null);
-                lifetime.addDamage(our.toDamageObject());
+
+                if(!event.isCancelled()) {
+                    lifetime.addDamage(our.toDamageObject());
+                }
             }
         }
 
