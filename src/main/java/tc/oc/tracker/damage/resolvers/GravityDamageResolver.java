@@ -33,13 +33,13 @@ public class GravityDamageResolver implements DamageResolver {
         Player player = (Player) entity;
         long time = this.timer.getTicks();
 
-        if(damageEvent instanceof EntityDamageByEntityEvent) {
+        Attack attack = this.tracker.attacks.get(player);
+        if(attack == null && damageEvent instanceof EntityDamageByEntityEvent) {
             EntityDamageByEntityEvent event = (EntityDamageByEntityEvent) damageEvent;
-            this.tracker.playerAttacked(player, event.getDamager(), time);
+            attack = this.tracker.playerAttacked(player, event.getDamager(), time);
         }
 
-        if(this.tracker.attacks.containsKey(player)) {
-            Attack attack = this.tracker.attacks.get(player);
+        if(attack != null) {
             EntityDamageEvent.DamageCause damageCause = damageEvent.getCause();
 
             if(this.tracker.wasAttackFatal(attack, damageCause, time)) {

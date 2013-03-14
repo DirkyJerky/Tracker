@@ -2,6 +2,7 @@ package tc.oc.tracker.trackers.base.gravity;
 
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 
 import javax.annotation.Nonnull;
 
@@ -19,9 +20,13 @@ import tc.oc.tracker.plugin.TrackerPlugin;
 import tc.oc.tracker.timer.TickTimer;
 import tc.oc.tracker.util.PlayerBlockChecker;
 
+import com.google.common.collect.Maps;
+
 public class SimpleGravityKillTracker extends AbstractTracker {
     public final HashMap<Location, BrokenBlock> brokenBlocks = new HashMap<Location, BrokenBlock>();
     public final HashMap<Player, Attack> attacks = new HashMap<Player, Attack>();
+
+    private final Map<Player, Attack> attackCache = Maps.newHashMap();
 
     public static final long MAX_KNOCKBACK_TIME = 20;
     public static final long MAX_SPLEEF_TIME = 20;
@@ -182,13 +187,21 @@ public class SimpleGravityKillTracker extends AbstractTracker {
 
         attack.wasAttacked = !this.isSupported(attack);
 
+        this.attackCache.put(player, attack); // cache the attack so we can save it later
+
+        return attack;
+    }
+
+    public Attack getAndRemoveCachedAttack(Player player) {
+        return this.attackCache.remove(player);
+    }
+
+    public void storeAttack(Player player, Attack attack) {
         this.attacks.put(player, attack);
 
         if(!attack.wasAttacked) {
             this.scheduleCheckAttackCancelled(attack, MAX_KNOCKBACK_TIME + 1);
         }
-
-        return attack;
     }
 
     public boolean wasAttackFatal(Attack attack, EntityDamageEvent.DamageCause damageCause, long time) {

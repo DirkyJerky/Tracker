@@ -10,6 +10,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerGameModeChangeEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
@@ -132,6 +133,18 @@ public class GravityListener implements Listener {
                 }
             }
         }, SimpleGravityKillTracker.MAX_SPLEEF_TIME + 1);
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onEntityDamage(final EntityDamageEvent event) {
+        // store the attack if it was not cancelled
+        if(event.getEntity() instanceof Player) {
+            Player player = (Player) event.getEntity();
+            Attack cached = this.tracker.getAndRemoveCachedAttack(player);
+            if(cached != null && !event.isCancelled()) {
+                this.tracker.storeAttack(player, cached);
+            }
+        }
     }
 
     private final @Nonnull TrackerPlugin plugin;
